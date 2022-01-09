@@ -139,6 +139,7 @@ class DefaultReproduction(DefaultClassConfig):
 
         new_population = {}
         species.species = {}
+        newNodesInGen = {}
         for spawn, s in zip(spawn_amounts, remaining_species):
             # If elitism is enabled, each species always at least gets to retain its elites.
             spawn = max(spawn, self.reproduction_config.elitism)
@@ -181,7 +182,7 @@ class DefaultReproduction(DefaultClassConfig):
                 gid = next(self.genome_indexer)
                 child = config.genome_type(gid)
                 child.configure_crossover(parent1, parent2, config.genome_config)
-                child.mutate(config.genome_config)
+                child.mutate(config.genome_config, newNodesInGen)
                 new_population[gid] = child
                 self.ancestors[gid] = (parent1_id, parent2_id)
 

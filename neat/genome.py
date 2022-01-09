@@ -262,7 +262,7 @@ class DefaultGenome(object):
                 # Homologous gene: combine genes from both parents.
                 self.nodes[key] = ng1.crossover(ng2)
 
-    def mutate(self, config):
+    def mutate(self, config, newNodesInGen):
         """ Mutates this genome. """
 
         if config.single_structural_mutation:
@@ -270,7 +270,7 @@ class DefaultGenome(object):
                           config.conn_add_prob + config.conn_delete_prob))
             r = random()
             if r < (config.node_add_prob/div):
-                self.mutate_add_node(config)
+                self.mutate_add_node(config, newNodesInGen)
             elif r < ((config.node_add_prob + config.node_delete_prob)/div):
                 self.mutate_delete_node(config)
             elif r < ((config.node_add_prob + config.node_delete_prob +
@@ -281,7 +281,7 @@ class DefaultGenome(object):
                 self.mutate_delete_connection()
         else:
             if random() < config.node_add_prob:
-                self.mutate_add_node(config)
+                self.mutate_add_node(config, newNodesInGen)
 
             if random() < config.node_delete_prob:
                 self.mutate_delete_node(config)
@@ -300,7 +300,7 @@ class DefaultGenome(object):
         for ng in self.nodes.values():
             ng.mutate(config)
 
-    def mutate_add_node(self, config):
+    def mutate_add_node(self, config, newNodesInGen):
         if not self.connections:
             if config.check_structural_mutation_surer():
                 self.mutate_add_connection(config)
@@ -308,7 +308,12 @@ class DefaultGenome(object):
 
         # Choose a random connection to split
         conn_to_split = choice(list(self.connections.values()))
-        new_node_id = config.get_new_node_key(self.nodes)
+        # new_node_id = config.get_new_node_key(self.nodes)
+        if conn_to_split.key in newNodesInGen:
+            new_node_id = newNodesInGen[conn_to_split.key]
+        else:
+            new_node_id = config.get_new_node_key(self.nodes)
+            newNodesInGen[conn_to_split.key] = new_node_id
         ng = self.create_node(config, new_node_id)
         self.nodes[new_node_id] = ng
 
